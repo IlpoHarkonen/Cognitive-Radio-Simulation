@@ -21,6 +21,8 @@ class BaseStation:
         #A list of frequencies which the base station senses being used nearby by someone else
         self.populated_frequencies = []
         
+        #A list of users that can communicate with the base station
+        #(i.e. received power is over the threshold)
         self.users_in_range = []
     
     """Sets the list self.alowed frequencies according to the operator-parameter"""

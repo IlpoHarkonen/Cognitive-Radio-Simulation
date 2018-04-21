@@ -15,3 +15,7 @@ class UserDevice:
         
         self.current_base_station = None
         self.stations_in_range = []
+        
+    def __str__(self):
+        text_to_print = "x: {}\ty:{}\tOperator: {}".format(self.x, self.y, self.operator)
+        return text_to_print
