@@ -9,7 +9,7 @@ class UserDevice:
         self.x = x
         self.y = y
         self.gain = gain
-        self.tx_power = tx_power #Watts
+        self.tx_power = cell_phone_tx_power #Watts
         self.operator = operator
         self.current_frequency = [f_min, f_max]
         

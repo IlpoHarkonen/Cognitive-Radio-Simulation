@@ -14,14 +14,25 @@ class BaseStation:
         self.x = x
         self.y = y
         self.gain = gain
-        self.tx_power = tx_power #Watts
+        self.tx_power = base_station_tx_power #Watts
         self.operator = operator
-        self.all_frequencies = []
+        self.allowed_frequencies = self.determine_allowed_frequencies()
         self.current_frequencies = []
         #A list of frequencies which the base station senses being used nearby by someone else
         self.populated_frequencies = []
         
         self.users_in_range = []
+    
+    """Sets the list self.alowed frequencies according to the operator-parameter"""
+    def determine_allowed_frequencies(self):
+        frequency_list = []
+        if self.operator != 0:
+            frequency_list = operator_frequencies[self.operator - 1]
+        else:
+            for operator in operator_frequencies:
+                for freq_range in operator:
+                    frequency_list.append(freq_range)
+        return frequency_list
     
     """Calculate the received power from each possible user to determine who we can communicate with"""
     def update_users_in_range(self, user_list):
@@ -30,4 +41,5 @@ class BaseStation:
             received_power = calculate_signal_power(self, user)
             if received_power > power_threshold:
                 self.users_in_range.append(user)
+                
                 
