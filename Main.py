@@ -6,8 +6,9 @@ import matplotlib
 import numpy as np
 
 
-"""Example of creatings and placing 100 stations in 1 square kilometer"""
-lst = create_base_station_grid(100, 1000, 0)
+"""Example of creatings and placing 9 stations in 1 square kilometer"""
+lst = create_base_station_grid(9, 1000, False)
 print(len(lst))
 for x in lst:
-    print("x: {}\ty: {}".format(x.x,x.y))
+    print(x)
+

@@ -7,16 +7,21 @@ from math import ceil
 
 """Create a set of base stations and place them into a square grid.
 The result is more even if the square root of the station count is an integer."""
-def create_base_station_grid(number_of_stations, width, operator):
+def create_base_station_grid(number_of_stations, width, spectrum_sharing = True):
     #Determine the number of rows/columns
     rows = ceil(np.sqrt(number_of_stations))
-    increment = width / rows
+    increment = width / (rows-1)
     #Fill the grid with stations
     assigned_stations = []
+    oper_index = 1
     for i in range(0, rows):
         for j in range(0, rows):
             if len(assigned_stations) < number_of_stations:
-                station = BaseStation(x=i*increment, y=j*increment, operator=operator)
+                if spectrum_sharing == True:
+                    station = BaseStation(x=i*increment, y=j*increment, operator=0)
+                else:
+                    station = BaseStation(x=i*increment, y=j*increment, operator=oper_index)
+                    oper_index = ((oper_index + 1) % 3) + 1
                 assigned_stations.append(station)
     return assigned_stations
     

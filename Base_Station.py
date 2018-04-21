@@ -42,4 +42,8 @@ class BaseStation:
             if received_power > power_threshold:
                 self.users_in_range.append(user)
                 
+    def __str__(self):
+        text_to_print = "x: {:.2f}  \ty:{:.2f}   \tOperator: {}".format(self.x, self.y, self.operator)
+        return text_to_print
+        
                 
