@@ -8,6 +8,13 @@ base_station_tx_power = 19.95 #Watts (~= 43 dBm)
 """Area width used (total area is width squared)"""
 area_width = 1000
 
+"""Starting frequency size (f_max - f_min).
+This is the slice that is initially given to a base station."""
+freq_start_size = 2 #MHz
+
+"""The amount we either increase or decrease our frequency range at once."""
+freq_step = 0.1 #MHz
+
 """1800 MHz and 2600 MHz frequencies.
 Sublists feature min and max values of a licensed band."""
 #Operator 1
