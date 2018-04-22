@@ -54,7 +54,7 @@ for user in users:
     plt.plot([user.x, user.current_base_station.x], [user.y, user.current_base_station.y], color = "green")
 #Users as dots
 for user in users:
-    plt.plot(user.x, user.y, "bo")
+    plt.plot(user.x, user.y, "o", color="blue")
 #Stations as dots
 for station in base_stations:
     plt.plot(station.x,station.y,"o", color="black")
