@@ -58,5 +58,6 @@ for user in users:
 #Stations as dots
 for station in base_stations:
     plt.plot(station.x,station.y,"o", color="black")
+    plt.text(station.x, station.y, str(station.id), color="red", fontsize=12)
 plt.show()
 

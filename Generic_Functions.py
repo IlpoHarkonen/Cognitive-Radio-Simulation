@@ -1,5 +1,6 @@
 from Base_Station import BaseStation
 from User_Device import UserDevice
+from Global_Variables import *
 import numpy as np
 import math
 
@@ -47,8 +48,9 @@ according to Friis transmission formula (free space).
 This can be substituted with a more accurate formula later on."""
 def calculate_signal_power(receiver, sender, freq_range):
     distance = np.sqrt(np.power(receiver.x - sender.x,2) + np.power(receiver.y - sender.y,2))
-    avg_wavelength = np.average(freq_range)
-    received_signal_power = (sender.tx_power * sender.gain * receiver.gain * np.power(avg_wavelength,2))\
+    avg_frequency = np.average(freq_range)
+    wavelength = speed_of_light/avg_frequency
+    received_signal_power = (sender.tx_power * sender.gain * receiver.gain * np.power(wavelength,2))\
                              / np.power(4 * np.pi * distance, 2)
     return received_signal_power
 
