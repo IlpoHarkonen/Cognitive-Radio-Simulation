@@ -1,9 +1,10 @@
-from Base_Station import BaseStation
-from User_Device import UserDevice
-from Generic_Functions import *
-from Global_Variables import *
+import math
+
 import matplotlib.pyplot as plt
 import numpy as np
+import settings
+from base_station import BaseStation
+from user_device import UserDevice
 
 
 """Create a set of base stations and place them into a square grid.
@@ -55,15 +56,15 @@ def create_users(number_of_users, width, spectrum_sharing = True):
 """Create and place 9 stations in 1 square kilometer.
 Also assigns a minimal starting frequency range to each base station at random.
 This will be grown dynamically later on."""
-base_stations = create_base_station_grid(9, area_width, False)
+base_stations = create_base_station_grid(9, settings.area_width, False)
 
 """Obligatory printing to confirm it works"""
 print("Base Stations")
 for x in base_stations:
     print(x)
-    
+
 """Place 50 users at random locations"""
-users = create_users(50, area_width, False)
+users = create_users(50, settings.area_width, False)
 
 
 
