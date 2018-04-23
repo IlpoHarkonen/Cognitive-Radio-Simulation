@@ -58,7 +58,7 @@ This will be grown dynamically later on."""
 base_stations = create_base_station_grid(9, area_width, False)
 
 """Obligatory printing to confirm it works"""
-print(len(base_stations))
+print("Base Stations")
 for x in base_stations:
     print(x)
     
@@ -75,13 +75,20 @@ for user in users:
 #set_initial_user_stations(users, base_stations)
 
 """Obligatory printing to confirm it works"""
-print(len(users))
+print("\nUsers")
 for x in users:
     print(x)
 
 """Make base stations listen to each other on initial frequency slices."""
 for station in base_stations:
     station.update_base_stations_in_range(base_stations)
+
+"""Obligatory printing to confirm it works."""
+print("\nWhich station needs hearing aids?")
+for station_1 in base_stations:
+    for station_2 in station.base_stations_in_range:
+        station_2_id = station_2[0].id
+        print(str(station_1.id) + "\t" + str(station_2_id))
 
 """Let base stations grow their frequency ranges up to the limit.
 At this stage we do not listen to users, only nearby stations."""

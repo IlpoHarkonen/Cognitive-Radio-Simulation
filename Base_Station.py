@@ -63,7 +63,7 @@ class BaseStation(GenericDevice):
                 for freq_range in station.currently_used_frequencies:
                     received_power = self.calculate_signal_power(station, freq_range)
                     if received_power > power_threshold:
-                        self.users_in_range.append([station, freq_range])
+                        self.base_stations_in_range.append([station, freq_range])
     
     """Assign a small random slice of frequency at the start."""
     def get_random_frequency(self):
