@@ -1,6 +1,11 @@
+import logging
+
 import numpy as np
+
 import settings
 from generic_functions import GenericDevice
+
+LOG = logging.getLogger(__name__)
 
 
 class UserDevice(GenericDevice):
@@ -29,10 +34,24 @@ class UserDevice(GenericDevice):
             if sig_pow > best_pow:
                 best_pow = sig_pow
                 best_station = station
+                LOG.debug(
+                    "Signal power for UserDevice at x: {} y: {} is {}".format(
+                        self.x, self.y, 10 * np.log10(sig_pow / 0.001)))
         # Update class attributes to correspond to the choice
         if best_station != None:
             self.current_base_station = best_station
             best_station.currently_served_users.append(self)
+
+    def function(self, arg1):
+        """TODO: Docstring for function.
+
+        Args:
+            arg1 (TODO): TODO
+
+        Returns: TODO
+
+        """
+        pass
 
     def __str__(self):
         text_to_print = "\tStation: {}"\

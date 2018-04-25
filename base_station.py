@@ -79,7 +79,7 @@ class BaseStation(GenericDevice):
                         station, freq_range)
                     if received_power > settings.power_threshold:
                         self.base_stations_in_range.append(
-                            [station, freq_range])
+                            [station, freq_range, received_power])
 
 
     def get_random_frequency(self):

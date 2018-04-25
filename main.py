@@ -105,13 +105,15 @@ for x in users:
 """Make base stations listen to each other on initial frequency slices."""
 for station in base_stations:
     station.update_base_stations_in_range(base_stations)
-
-
 """Obligatory LOG.debuging to confirm it works."""
 LOG.debug("\nWhich station needs hearing aids?")
 for station_1 in base_stations:
     for station_2 in station_1.base_stations_in_range:
         station_2_id = station_2[0].id
+        station_2_power = 10 * np.log10(station_2[2] / 0.001)
+        LOG.debug(
+            "Basestation id: {} sees another station id: {} with power of {}".
+            format(station_1.id, station_2_id, station_2_power))
         LOG.debug(str(station_1.id) + "\t" + str(station_2_id))
 """Let base stations grow their frequency ranges up to the limit.
 At this stage we do not listen to users, only nearby stations."""

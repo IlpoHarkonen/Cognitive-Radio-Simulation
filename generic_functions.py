@@ -17,7 +17,6 @@ class GenericDevice:
         according to Friis transmission formula (free space).
         This can be substituted with a more accurate formula later on.
         CALCULATION IS DONE FROM THE RECEIVER PERSPECTIVE. i.e. The object calling the function.
-        Returns logarithmic value
         """
         distance = np.sqrt(
             np.power(self.x - sender.x, 2) + np.power(self.y - sender.y, 2))
