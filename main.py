@@ -77,7 +77,10 @@ def create_users(number_of_users, width, spectrum_sharing=True):
 """Create and place 9 stations in 1 square kilometer.
 Also assigns a minimal starting frequency range to each base station at random.
 This will be grown dynamically later on."""
-base_stations = create_base_station_grid(9, settings.area_width, False)
+#  base_stations = create_base_station_grid(9, settings.area_width, False)
+f = open('store_stations', 'rb')
+base_stations = pickle.load(f)
+f.close()
 """Obligatory LOG.debuging to confirm it works"""
 LOG.debug("Base Stations")
 for x in base_stations:
@@ -89,6 +92,7 @@ for x in base_stations:
 f = open('store.pckl', 'rb')
 users = pickle.load(f)
 f.close()
+
 """Let users connect to their nearest/best station first.
 Strive for maximal signal strength without considering other users and interference (GADIA)."""
 for user in users:
@@ -101,10 +105,12 @@ for x in users:
 """Make base stations listen to each other on initial frequency slices."""
 for station in base_stations:
     station.update_base_stations_in_range(base_stations)
+
+
 """Obligatory LOG.debuging to confirm it works."""
 LOG.debug("\nWhich station needs hearing aids?")
 for station_1 in base_stations:
-    for station_2 in station.base_stations_in_range:
+    for station_2 in station_1.base_stations_in_range:
         station_2_id = station_2[0].id
         LOG.debug(str(station_1.id) + "\t" + str(station_2_id))
 """Let base stations grow their frequency ranges up to the limit.
