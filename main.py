@@ -78,8 +78,13 @@ def create_users(number_of_users, width, spectrum_sharing=True):
 Also assigns a minimal starting frequency range to each base station at random.
 This will be grown dynamically later on."""
 #  base_stations = create_base_station_grid(9, settings.area_width, False)
-f = open('store_stations', 'rb')
+# Load
+f = open('store_stations.pckl', 'rb')
 base_stations = pickle.load(f)
+f.close()
+# Store
+f = open('store_stations.pckl', 'wb')
+pickle.dump(base_stations, f)
 f.close()
 """Obligatory LOG.debuging to confirm it works"""
 LOG.debug("Base Stations")
@@ -87,12 +92,14 @@ for x in base_stations:
     LOG.debug(x)
 """Place 50 users at random locations"""
 # Load them from file
-# users = create_users(50, settings.area_width, False)
-#
-f = open('store.pckl', 'rb')
+#  users = create_users(50, settings.area_width, False)
+# Load
+f = open('store_users.pckl', 'rb')
 users = pickle.load(f)
 f.close()
-
+f = open('store_users.pckl', 'wb')
+pickle.dump(users, f)
+f.close()
 """Let users connect to their nearest/best station first.
 Strive for maximal signal strength without considering other users and interference (GADIA)."""
 for user in users:
