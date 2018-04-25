@@ -17,10 +17,11 @@ class GenericDevice:
         according to Friis transmission formula (free space).
         This can be substituted with a more accurate formula later on.
         CALCULATION IS DONE FROM THE RECEIVER PERSPECTIVE. i.e. The object calling the function.
+        Returns logarithmic value
         """
         distance = np.sqrt(
             np.power(self.x - sender.x, 2) + np.power(self.y - sender.y, 2))
-        avg_frequency = np.average(freq_range)
+        avg_frequency = np.average(freq_range) * 1e6
         wavelength = settings.speed_of_light / avg_frequency
         received_signal_power = (
             sender.tx_power * sender.gain * self.gain * np.power(
