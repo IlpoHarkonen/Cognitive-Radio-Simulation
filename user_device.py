@@ -29,7 +29,7 @@ class UserDevice(GenericDevice):
             if sig_pow > best_pow:
                 best_pow = sig_pow
                 best_station = station
-        #Update class attributes to correspond to the choice
+        # Update class attributes to correspond to the choice
         if best_station != None:
             self.current_base_station = best_station
             best_station.currently_served_users.append(self)
