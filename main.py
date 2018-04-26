@@ -117,18 +117,38 @@ LOG.debug("\nWhich station needs hearing aids?")
 for station_1 in base_stations:
     for station_2 in station_1.base_stations_in_range:
         station_2_id = station_2[0].id
-        station_2_power = 10 * np.log10(station_2[2] / 0.001)
         LOG.debug(
-            "Basestation id: {} sees another station id: {} with power of {}".
-            format(station_1.id, station_2_id, station_2_power))
+            "Basestation id: {} sees another station id: {}".
+            format(station_1.id, station_2_id))
         LOG.debug(str(station_1.id) + "\t" + str(station_2_id))
 """Let base stations grow their frequency ranges up to the limit.
-At this stage we do not listen to users, only nearby stations."""
+At this stage we do not listen to users, only nearby stations. IS THIS STEP EVEN NEEDED?"""
 """LOOP START"""
-"""Users can now switch to another less populated base station.
-This is done with the following knowledge:
-- Number of users that each nearby base station is serving
-- Frequency ranges currently used by nearby stations."""
+vote_stop = False
+round_count = 1
+while vote_stop == False:
+    print("Game rounds taken: {}".format(round_count))
+    round_count += 1
+    vote_stop = True
+    """Users can now switch to another base station.
+    This is done with the following knowledge:
+    - Number of users that each nearby base station is serving
+    - Frequency ranges currently used by nearby stations.
+    - Sensed noise from other users subscribed to different base stations"""
+    # 1. Update devices in range
+    # Dynamic frequencies might occasionally hide some users whicih we previously heard
+    for user in users:
+        user.update_users_in_range(users)
+        user.update_base_stations_in_range(base_stations)
+        
+    # 2. Change base stations
+    for user in users:
+        user.look_for_new_station(users)        
+        
+    # 3. Check if any user votes to stop
+    for user in users:
+        if user.vote_to_stop == False:
+            vote_stop = False
 """Let base stations adjust their frequency range dynamically according to the user count."""
 """LOOP END WHEN NOTHING CHANGES"""
 """Summarise and plot results"""

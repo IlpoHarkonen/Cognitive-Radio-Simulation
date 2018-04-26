@@ -22,6 +22,11 @@ freq_step = 0.1 # MHz
 """ Noise factor """
 noise_factor = 0.01
 
+"""Chance that we hop to another base station.
+This base chance is further divided by the number
+of users the hopping user currently senses."""
+base_hop_chance = 0.9
+
 """1800 MHz and 2600 MHz frequencies.
 Sublists feature min and max values of a licensed band."""
 # Operator 1

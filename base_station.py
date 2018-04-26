@@ -23,15 +23,14 @@ class BaseStation(GenericDevice):
         # with debugging.
         self.id = id
         self.allowed_frequencies = self.determine_allowed_frequencies()
-        self.currently_used_frequencies = []
+        
         self.currently_sensed_frequencies = []
         # A list of frequencies which the base station senses being
         # used nearby by someone else
         self.populated_frequencies = []
 
-        # A list of users that can communicate with the base station.
-        # (i.e. received power is over the threshold)
-        self.users_in_range = []
+        
+
         self.currently_served_users = []
 
         # List of base stations we can directly communicate with.
@@ -53,33 +52,9 @@ class BaseStation(GenericDevice):
                     frequency_list.append(freq_range)
         return frequency_list
 
-    def update_users_in_range(self, user_list):
-        """Calculate the received power from each possible user to
-        determine who we can communicate with.
-        """
-        self.users_in_range = []
-        for user in user_list:
-            for freq_range in user.currently_used_frequencies:
-                received_power = self.calculate_signal_power(user, freq_range)
-                if received_power > settings.power_threshold:
-                    self.users_in_range.append([user, freq_range])
+    
 
-    def update_base_stations_in_range(self, base_station_list):
-        """Calculate the received power from each possible base_station
-        to determine who we can communicate with. Can also be used to
-        refresh the list if a nreaby station switches frequency and
-        thus turns invisible.
-        """
-        self.base_stations_in_range = []
-        for station in base_station_list:
-            # Don't compare a base station with itself
-            if station.id != self.id:
-                for freq_range in station.currently_used_frequencies:
-                    received_power = self.calculate_signal_power(
-                        station, freq_range)
-                    if received_power > settings.power_threshold:
-                        self.base_stations_in_range.append(
-                            [station, freq_range, received_power])
+    
 
 
     def get_random_frequency(self):

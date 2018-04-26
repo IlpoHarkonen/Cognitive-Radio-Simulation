@@ -11,6 +11,12 @@ class GenericDevice:
         self.tx_power = tx_power
         self.operator = operator
         self.currently_used_frequencies = []
+        
+        # Lists of devices that we can communicate with.
+        # (i.e. received power is over the threshold)
+        # Example: [ [device 1, [freq_min, freq_max]], [device 2, [freq_min, freq_max]] ]
+        self.users_in_range = []
+        self.base_stations_in_range = []
         self.vote_to_stop = False
 
     def calculate_signal_power(self, sender, freq_range):
@@ -37,6 +43,38 @@ class GenericDevice:
             sig_pow += self.calculate_signal_power(sender, freq_range)\
                             /(len(sender.currently_used_frequencies))
         throughput = B * np.log2(1 + sig_pow / (noise_from_other_devices + settings.noise_factor))
+        return throughput
+    
+    
+    def update_users_in_range(self, user_list):
+        """Calculate the received power from each possible user to
+        determine who we can communicate with.
+        """
+        self.users_in_range = []
+        for user in user_list:
+            if user != self:
+                for freq_range in user.currently_used_frequencies:
+                    received_power = self.calculate_signal_power(user, freq_range)
+                    if received_power > settings.power_threshold:
+                        self.users_in_range.append([user, freq_range])
+    
+    
+    def update_base_stations_in_range(self, base_station_list):
+        """Calculate the received power from each possible base_station
+        to determine who we can communicate with. Can also be used to
+        refresh the list if a nreaby station switches frequency and
+        thus turns invisible.
+        """
+        self.base_stations_in_range = []
+        for station in base_station_list:
+            # Don't compare a base station with itself
+            if station != self:
+                for freq_range in station.currently_used_frequencies:
+                    received_power = self.calculate_signal_power(
+                        station, freq_range)
+                    if received_power > settings.power_threshold:
+                        self.base_stations_in_range.append(
+                            [station, freq_range])
 
     def __str__(self):
         text_to_print = "x: {}    \ty:{}     \tOperator: {}".format(
