@@ -150,6 +150,9 @@ while vote_stop == False:
         if user.vote_to_stop == False:
             vote_stop = False
 """Let base stations adjust their frequency range dynamically according to the user count."""
+
+
+
 """LOOP END WHEN NOTHING CHANGES"""
 """Summarise and plot results"""
 #Lines from users to their base stations

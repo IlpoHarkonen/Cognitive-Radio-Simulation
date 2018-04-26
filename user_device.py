@@ -89,7 +89,7 @@ class UserDevice(GenericDevice):
         if best_station != None:
             self.vote_to_stop = False
             dice_roll = np.random.randint(0,100)/100
-            hop_chance = settings.base_hop_chance/(len(self.users_in_range) + 1)
+            hop_chance = settings.base_hop_chance/(len(self.current_base_station.currently_served_users) + 1)
             if dice_roll <= hop_chance:
                 current_station = self.current_base_station
                 current_station.currently_served_users.remove(self)
