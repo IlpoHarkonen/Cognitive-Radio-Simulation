@@ -20,6 +20,7 @@ class UserDevice(GenericDevice):
             operator=operator)
         self.currently_used_frequencies = []
         self.current_base_station = None
+        # Stations in range: [ [station1, [freq_min, freq_max], sig_pow] ]
         self.stations_in_range = []
 
     """Initial station is chosen purely on best received signal power"""
@@ -42,7 +43,45 @@ class UserDevice(GenericDevice):
             self.current_base_station = best_station
             best_station.currently_served_users.append(self)
 
-    def function(self, arg1):
+
+    def update_stations_in_range(self, station_list):
+        pass
+    
+    """Changes to a better base station on probability P if one if found. We only consider the best found station."""
+    def look_for_new_station(self, user_list):
+        best_throughput = 0
+        best_station = None
+        for [station, freq_range_1, recv_pow] in self.stations_in_range:
+            # Calculate SNR on the given frequency range.
+            # Only interference is from users subsribed to other base stations using the same frequency.
+            noise = 0
+            for user in user_list:
+                if user != self and station != user.current_base_station:
+                    for freq_range_2 in user.currently_used_frequencies:
+                        # Check for frequency overlap
+                        if freq_range_2[0] < freq_range_1[0] < freq_range_2[1] or \
+                        freq_range_2[0] < freq_range_1[1] < freq_range_2[1]:
+                            # Add noise in proportion to how often the colliding user transmits
+                            noise += self.calculate_signal_power(user, freq_range_2)\
+                            /len(user.current_base_station.currently_served_users)
+                        
+            # Calculate throughput if we choose the station
+            obtainable_throughput = self.calculate_throughput(station, noise) / (len(station.currently_served_users)+1)
+            if obtainable_throughput > best_throughput:
+                best_throughput = obtainable_throughput
+                best_station = station
+        # Finally switch to the new station if one was found. Otherwise vote to stop
+        if best_station != None:
+            current_station = self.current_base_station
+            current_station.currently_served_users.remove(self)
+            best_station.currently_served_users.append(self)
+            self.current_base_station = best_station
+            self.vote_to_stop = False
+        else:
+            self.vote_to_stop = True
+        
+        
+        
         """TODO: Docstring for function.
 
         Args:
