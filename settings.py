@@ -12,12 +12,13 @@ base_station_tx_power = 19.95 # Watts (~= 43 dBm)
 area_width = 1000
 
 """Starting frequency size (f_max - f_min).
-This is the slice that is initially given to a base station."""
-freq_start_size = 2 # MHz
+This is the slice that is initially given to a base station.
+KEEP THIS AS 1. (Hacker optimization in main.create_base_station_grid)"""
+freq_start_size = 1 # MHz
 
 """The amount we either increase or decrease our frequency range at
 once."""
-freq_step = 0.1 # MHz
+freq_step = 1 # MHz
 
 """ Noise factor """
 noise_factor = 0.01
@@ -27,13 +28,21 @@ This base chance is further divided by the number
 of users the hopping user currently senses."""
 base_hop_chance = 0.9
 
+"""Scaling threshold. These are used as threshold  values
+when deciding if we should scale our frequency up or down.
+We compare the factor to division of bases station scores,
+which are calculated from currently used bandwidth and number of users."""
+scale_threshold = 1.05
+
+
+
 """1800 MHz and 2600 MHz frequencies.
 Sublists feature min and max values of a licensed band."""
 # Operator 1
-DNA_frequencies =   [[1735.1, 1759.9], [2500, 2520]]
+DNA_frequencies =   [[1735, 1759], [2500, 2520]]
 # Operator 2
-Elisa_frequencies = [[1760.1, 1784.9], [2545, 2570]]
+Elisa_frequencies = [[1760, 1784], [2545, 2570]]
 # Operator 3
-Telia_frequencies = [[1710.1, 1734.9], [2520, 2545]]
+Telia_frequencies = [[1710, 1734], [2520, 2545]]
 
 operator_frequencies = [DNA_frequencies, Elisa_frequencies, Telia_frequencies]

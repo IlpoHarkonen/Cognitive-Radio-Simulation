@@ -10,6 +10,9 @@ import settings
 from base_station import BaseStation
 from user_device import UserDevice
 
+
+
+
 LOG = logging.getLogger("main")
 parser = argparse.ArgumentParser()
 parser.add_argument(
@@ -33,6 +36,7 @@ def create_base_station_grid(number_of_stations, width, spectrum_sharing=True):
     increment = width / (rows - 1)
     # Fill the grid with stations
     assigned_stations = []
+    taken_frequencies = []
     oper_index = 1
     cnt = 0
     for i in range(0, rows):
@@ -49,6 +53,9 @@ def create_base_station_grid(number_of_stations, width, spectrum_sharing=True):
                         operator=oper_index,
                         id=cnt)
                     oper_index = ((oper_index + 1) % 3) + 1
+                while station.currently_used_frequencies[0] in taken_frequencies:
+                    station.get_random_frequency()
+                taken_frequencies.append(station.currently_used_frequencies[0])
                 assigned_stations.append(station)
     return assigned_stations
 
@@ -71,13 +78,15 @@ def create_users(number_of_users, width, spectrum_sharing=True):
     return user_list
 
 
+
+
 ######################
 #  START SIMULATING  #
 ######################
 """Create and place 9 stations in 1 square kilometer.
 Also assigns a minimal starting frequency range to each base station at random.
 This will be grown dynamically later on."""
-#  base_stations = create_base_station_grid(9, settings.area_width, False)
+
 # Load
 f = open('store_stations.pckl', 'rb')
 base_stations = pickle.load(f)
@@ -86,13 +95,14 @@ f.close()
 f = open('store_stations.pckl', 'wb')
 pickle.dump(base_stations, f)
 f.close()
+
+base_stations = create_base_station_grid(9, settings.area_width, False)
 """Obligatory LOG.debuging to confirm it works"""
 LOG.debug("Base Stations")
 for x in base_stations:
     LOG.debug(x)
 """Place 50 users at random locations"""
 # Load them from file
-#  users = create_users(50, settings.area_width, False)
 # Load
 f = open('store_users.pckl', 'rb')
 users = pickle.load(f)
@@ -100,6 +110,8 @@ f.close()
 f = open('store_users.pckl', 'wb')
 pickle.dump(users, f)
 f.close()
+
+users = create_users(50, settings.area_width, False)
 """Let users connect to their nearest/best station first.
 Strive for maximal signal strength without considering other users and interference (GADIA)."""
 for user in users:
@@ -130,17 +142,19 @@ while vote_stop == False:
     print("Game rounds taken: {}".format(round_count))
     round_count += 1
     vote_stop = True
+    
+    
+    
     """Users can now switch to another base station.
     This is done with the following knowledge:
     - Number of users that each nearby base station is serving
     - Frequency ranges currently used by nearby stations.
-    - Sensed noise from other users subscribed to different base stations"""
-    # 1. Update devices in range
+    - Sensed noise from other users subscribed to different base stations""" 
+    # 1. Update devices in range of all users
     # Dynamic frequencies might occasionally hide some users whicih we previously heard
     for user in users:
         user.update_users_in_range(users)
         user.update_base_stations_in_range(base_stations)
-        
     # 2. Change base stations
     for user in users:
         user.look_for_new_station(users)        
@@ -149,11 +163,27 @@ while vote_stop == False:
     for user in users:
         if user.vote_to_stop == False:
             vote_stop = False
-"""Let base stations adjust their frequency range dynamically according to the user count."""
-
-
-
+    """Let base stations adjust their frequency range dynamically according to the user count."""
+    # 4. Update devices in range of all base stations
+    for station in base_stations:
+        station.update_users_in_range(users)
+        station.update_base_stations_in_range(base_stations)
+    
+    # 5. let base stations scale their frequencies
+    
+    for station in base_stations:
+        station.scale_frequency()
+    
+    # 6 Check if any base station votes to stop
+    # Uncomment when done with dynamic spectrum allocation
+    """
+    for station in base_stations:
+        if station.vote_to_stop == False:
+            vote_stop = False
+    """
+    
 """LOOP END WHEN NOTHING CHANGES"""
+
 """Summarise and plot results"""
 #Lines from users to their base stations
 for user in users:

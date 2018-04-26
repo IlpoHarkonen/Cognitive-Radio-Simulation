@@ -10,6 +10,7 @@ class GenericDevice:
         self.gain = gain
         self.tx_power = tx_power
         self.operator = operator
+        #The frequencies this device is using
         self.currently_used_frequencies = []
         
         # Lists of devices that we can communicate with.
