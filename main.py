@@ -169,6 +169,7 @@ for x in users:
 """Make base stations listen to each other on initial frequency slices."""
 for station in base_stations:
     station.update_base_stations_in_range(base_stations)
+    LOG.debug("CUR FREQ " + str(station.currently_used_frequencies))
 """Obligatory LOG.debuging to confirm it works."""
 LOG.debug("\nWhich station needs hearing aids?")
 for station_1 in base_stations:
@@ -181,6 +182,7 @@ for station_1 in base_stations:
 """Let base stations grow their frequency ranges up to the limit.
 At this stage we do not listen to users, only nearby stations. IS THIS STEP EVEN NEEDED?"""
 """LOOP START"""
+LOG.debug(str())
 vote_stop = False
 round_count = 1
 while vote_stop == False:
@@ -200,7 +202,7 @@ while vote_stop == False:
         # Change base stations
         user.look_for_new_station(users)
 
-        
+
 
     # 2. Check if any user votes to stop
     for user in users:
@@ -220,7 +222,7 @@ while vote_stop == False:
     for station in base_stations:
         if station.vote_to_stop == False:
             vote_stop = False
-    
+
     if round_count == 14:
         vote_stop = True
 

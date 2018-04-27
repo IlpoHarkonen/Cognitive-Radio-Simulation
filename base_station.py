@@ -5,11 +5,17 @@ Operator:
 2: Elisa
 3: Telia
 """
+import logging
+from pdb import break_on_setattr
+
 import numpy as np
+
 import settings
 from generic_functions import GenericDevice
 
+LOG = logging.getLogger(__name__)
 
+@break_on_setattr('currently_used_frequencies')
 class BaseStation(GenericDevice):
     def __init__(self, x=0, y=0, gain=1, tx_power=0, operator=0, id=0):
         GenericDevice.__init__(
@@ -23,14 +29,14 @@ class BaseStation(GenericDevice):
         # with debugging.
         self.id = id
         self.allowed_frequencies = self.determine_allowed_frequencies()
-        
+
         self.currently_sensed_frequencies = []
         # A list of frequencies which the base station senses being
         # used nearby by someone else
         self.populated_frequencies = []
         self.obtainable_frequencies = []
 
-        
+
 
         self.currently_served_users = []
 
@@ -53,7 +59,7 @@ class BaseStation(GenericDevice):
                     frequency_list.append(freq_range[:])
         return frequency_list
 
-    
+
 
     def get_random_frequency(self):
         """Assign a small random slice of frequency at the start."""
@@ -67,7 +73,7 @@ class BaseStation(GenericDevice):
         f_max = f_min + settings.freq_start_size
         self.currently_used_frequencies = [[f_min, f_max]]
 
-    
+
     def update_currently_sensed_frequencies(self):
         """List which frequency ranges we hear being used and are not used by ourselves.
         Also update the list of frequencies we deem available."""
@@ -104,8 +110,8 @@ class BaseStation(GenericDevice):
             i += 1
             if i < 0:
                 i = 0
-        
-    
+
+
     def minimize_currently_used_frequency_list(self):
         """Optimization function to speed up computing.
         Looks at currently used frequency lists and merges two frequencies that are next to each other."""
@@ -142,7 +148,7 @@ class BaseStation(GenericDevice):
         for freq_range in self.currently_used_frequencies:
             own_bandwidth += freq_range[1] - freq_range[0]
         own_scale_factor = own_bandwidth/(len(self.currently_served_users) + 1)
-        
+
         # Calculate same metric for other stations we hear
         worst_factor = 9001
         best_factor = 0
@@ -156,7 +162,7 @@ class BaseStation(GenericDevice):
                 worst_factor = station_scale_factor
             if station_scale_factor > best_factor:
                 best_factor = station_scale_factor
-                
+
         # Compare metrics
         #worst_factor = int(worst_factor * 1000)
         #best_factor = int(best_factor * 1000)
@@ -180,6 +186,7 @@ class BaseStation(GenericDevice):
         # Remove frequencies we use from the available frequency list
         for freq in self.currently_used_frequencies:
             if freq in self.obtainable_frequencies:
+                LOG.debug("DELETED")
                 self.obtainable_frequencies.remove(freq)
         # Acquire spectrum
         if len(self.obtainable_frequencies) > 0:
@@ -188,9 +195,16 @@ class BaseStation(GenericDevice):
             else:
                 r = np.random.randint(0,len(self.obtainable_frequencies)-1)
             self.currently_used_frequencies.append(self.obtainable_frequencies[r])
+            LOG.debug("New frequency is for base station " + str(self.id) + " is " + str(self.obtainable_frequencies[r]))
+            if self.id == 4:
+                LOG.debug("CURRENT USED FREQUENCIES " + str(self.currently_used_frequencies))
             for user in self.currently_served_users:
                 user.currently_used_frequencies.append(self.obtainable_frequencies[r])
+            LOG.debug("SOON TO POP " + str(self.obtainable_frequencies))
+            LOG.debug("Length: " + str(len(self.obtainable_frequencies)))
             self.obtainable_frequencies.pop(r)
+            LOG.debug("POPPED" + str(self.obtainable_frequencies))
+            LOG.debug("Length: " + str(len(self.obtainable_frequencies)))
 
     def decrease_own_spectrum(self):
         """Choose a random frequency range we use and decrease it or remove completely if it is small."""
@@ -198,7 +212,7 @@ class BaseStation(GenericDevice):
             r = 0
         else:
             r = np.random.randint(0,len(self.currently_used_frequencies)-1)
-        
+
         tmp_freq = self.currently_used_frequencies[r]
         # Remove completely if small
         if tmp_freq[1] - tmp_freq[0] - settings.freq_step < settings.freq_start_size\
@@ -212,8 +226,8 @@ class BaseStation(GenericDevice):
             user.currently_used_frequencies = []
             user.currently_used_frequencies = self.currently_used_frequencies[:]
 
-    
-    
+
+
     def scale_frequency(self):
         """A base station can obtain more bandwidth if it does not sense anyone else using said bandwidth.
         The bandwidth is incremented in small hops. We let stations have bandwidth proportional to their
@@ -238,9 +252,9 @@ class BaseStation(GenericDevice):
             self.acquire_more_spectrum()
         elif scale_direction == -1:
             self.decrease_own_spectrum()
-        
-        
-        
+
+
+
     def __str__(self):
         bandwidth = 0
         for freq_range in self.currently_used_frequencies:
