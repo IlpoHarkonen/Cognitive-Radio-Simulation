@@ -151,7 +151,7 @@ f = open('store_users.pckl', 'wb')
 pickle.dump(users, f)
 f.close()
 
-users = create_users(50, settings.area_width, False)
+users = create_users(30, settings.area_width, False)
 """Let users connect to their nearest/best station first.
 Strive for maximal signal strength without considering other users and interference (GADIA)."""
 for user in users:
@@ -182,9 +182,6 @@ while vote_stop == False:
     print("Game rounds taken: {}".format(round_count))
     round_count += 1
     vote_stop = True
-
-
-
     """Users can now switch to another base station.
     This is done with the following knowledge:
     - Number of users that each nearby base station is serving
@@ -195,26 +192,25 @@ while vote_stop == False:
     for user in users:
         user.update_users_in_range(users)
         user.update_base_stations_in_range(base_stations)
-    # 2. Change base stations
-    for user in users:
+        # Change base stations
         user.look_for_new_station(users)
 
-    # 3. Check if any user votes to stop
+        
+
+    # 2. Check if any user votes to stop
     for user in users:
         if user.vote_to_stop == False:
             vote_stop = False
     """Let base stations adjust their frequency range dynamically according to the user count."""
-    # 4. Update devices in range of all base stations
+    # 3. Update devices in range of all base stations and
+    # let base stations scale their frequencies
+
     for station in base_stations:
         station.update_users_in_range(users)
         station.update_base_stations_in_range(base_stations)
-
-    # 5. let base stations scale their frequencies
-
-    for station in base_stations:
         station.scale_frequency()
 
-    # 6 Check if any base station votes to stop
+    # 4. Check if any base station votes to stop
     # Uncomment when done with dynamic spectrum allocation
     """
     for station in base_stations:
@@ -223,6 +219,7 @@ while vote_stop == False:
     """
 
 """LOOP END WHEN NOTHING CHANGES"""
+
 
 """Summarise and plot results"""
 # Lines from users to their base stations

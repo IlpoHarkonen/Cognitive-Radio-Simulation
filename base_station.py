@@ -28,6 +28,7 @@ class BaseStation(GenericDevice):
         # A list of frequencies which the base station senses being
         # used nearby by someone else
         self.populated_frequencies = []
+        self.obtainable_frequencies = []
 
         
 
@@ -68,7 +69,9 @@ class BaseStation(GenericDevice):
 
     
     def update_currently_sensed_frequencies(self):
-        """List which frequency ranges we hear being used and are not used by ourselves."""
+        """List which frequency ranges we hear being used and are not used by ourselves.
+        Also update the list of frequencies we deem available."""
+        # See which frequencies we currently hear.
         self.currently_sensed_frequencies = []
         for [user, freq_range] in self.users_in_range:
             if freq_range not in self.currently_sensed_frequencies:
@@ -76,7 +79,26 @@ class BaseStation(GenericDevice):
         for [station, freq_range] in self.base_stations_in_range:
             if freq_range not in self.currently_sensed_frequencies:
                 self.currently_sensed_frequencies.append(freq_range)
-                
+        # Determine which frequencies are currently free
+        self.obtainable_frequencies = self.allowed_frequencies
+        i = 0
+        while i < len(self.obtainable_frequencies):
+            freq_range_1 = self.obtainable_frequencies[i]
+            for freq_range_2 in self.currently_sensed_frequencies:
+                # Check if f_min is inside the band and split lists accordingly
+                if freq_range_1[0] < freq_range_2[0] < freq_range_1[1]:
+                    self.obtainable_frequencies.append([freq_range_1[0] - settings.freq_step, freq_range_2[0]])
+                    if freq_range_1 in self.obtainable_frequencies:
+                        self.obtainable_frequencies.remove(freq_range_1)
+                    i -= 1
+                if freq_range_1[0] < freq_range_2[1] < freq_range_1[1]:
+                    self.obtainable_frequencies.append([freq_range_2[1], freq_range_1[1] - settings.freq_step])
+                    if freq_range_1 in self.obtainable_frequencies:
+                        self.obtainable_frequencies.remove(freq_range_1)
+                    i -= 1
+            i += 1
+            if i < 0:
+                i = 0
 
     def determine_proportional_scaling_direction(self):
         """Most fortunate station is forced to scale down (if able)
@@ -141,6 +163,20 @@ class BaseStation(GenericDevice):
         The bandwidth is incremented in small hops. We let stations have bandwidth proportional to their
         subscirbed user counts + 1."""
         self.update_currently_sensed_frequencies()
+        # If there is completely free frequency, take a slice of it and end method
+        if len(self.obtainable_frequencies) > 0:
+            if len(self.obtainable_frequencies) == 1:
+                r = 0
+            else:
+                r = np.random.randint(0,len(self.obtainable_frequencies)-1)
+            self.currently_used_frequencies.append(self.obtainable_frequencies[r])
+            #for user in self.currently_served_users:
+            #    user.currently_used_frequencies.append(self.obtainable_frequencies[r])
+            self.obtainable_frequencies.pop(r)
+            self.vote_to_stop = False
+            return 0
+        
+        
         # Determine if we are allowed to scale.
         # If scale direction is up (1), available spectrum is not guaranteed to exist.
         scale_direction = self.determine_proportional_scaling_direction()
