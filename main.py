@@ -23,7 +23,9 @@ parser.add_argument(
 parser.add_argument(
     "-n", "--noise-factor", help="Noise factor.", type=float)
 parser.add_argument(
-    "-s", "--scale-threshold", help="Threshold value when deciding frequency scaling up or down.", type=float)
+    "-su", "--scale-up-threshold", help="Threshold value when deciding frequency scaling up.", type=float)
+parser.add_argument(
+    "-sd", "--scale-down-threshold", help="Threshold value when deciding frequency scaling down.", type=float)
 parser.add_argument(
     "-t", "--cell-phone-tx-power", help="Transmit power of cell phone", type=float)
 parser.add_argument(
@@ -53,9 +55,12 @@ if args.frequency_step:
 if args.noise_factor:
     settings.noise_factor= args.noise_factor
     LOG.info("Adjusting noise factor to {} ".format(settings.noise_factor))
-if args.scale_threshold:
-    settings.scale_threshold = args.scale_threshold
-    LOG.info("Adjusting scale threshold to {}".format(settings.scale_threshold))
+if args.scale_up_threshold:
+    settings.scale_up_threshold = args.scale_up_threshold
+    LOG.info("Adjusting scale up threshold to {}".format(settings.scale_up_threshold))
+if args.scale_down_threshold:
+    settings.scale_down_threshold = args.scale_down_threshold
+    LOG.info("Adjusting scale down threshold to {}".format(settings.scale_down_threshold))
 if args.cell_phone_tx_power:
     settings.cell_phone_tx_power = args.cell_phone_tx_power
     LOG.info("Adjusting cell phone transmit power to {} W".format(settings.cell_phone_tx_power))
@@ -136,7 +141,7 @@ f = open('store_stations.pckl', 'wb')
 pickle.dump(base_stations, f)
 f.close()
 
-base_stations = create_base_station_grid(9, settings.area_width, False)
+base_stations = create_base_station_grid(9, settings.area_width, settings.spectrum_sharing)
 """Obligatory LOG.debuging to confirm it works"""
 LOG.debug("Base Stations")
 for x in base_stations:
@@ -151,7 +156,7 @@ f = open('store_users.pckl', 'wb')
 pickle.dump(users, f)
 f.close()
 
-users = create_users(30, settings.area_width, False)
+users = create_users(30, settings.area_width, settings.spectrum_sharing)
 """Let users connect to their nearest/best station first.
 Strive for maximal signal strength without considering other users and interference (GADIA)."""
 for user in users:
@@ -212,14 +217,16 @@ while vote_stop == False:
 
     # 4. Check if any base station votes to stop
     # Uncomment when done with dynamic spectrum allocation
-    """
     for station in base_stations:
         if station.vote_to_stop == False:
             vote_stop = False
-    """
+    
+    if round_count == 14:
+        vote_stop = True
 
 """LOOP END WHEN NOTHING CHANGES"""
-
+for station in base_stations:
+    print(station)
 
 """Summarise and plot results"""
 # Lines from users to their base stations

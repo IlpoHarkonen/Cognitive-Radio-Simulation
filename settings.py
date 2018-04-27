@@ -1,5 +1,9 @@
 speed_of_light = 299792458
 
+"""Choose to share all spectrum between all devices (True)
+or restrict into different operators (False)"""
+spectrum_sharing = True
+
 """Minimum received power for a device to be able to communicate with
 another (-100 dBm)"""
 power_threshold = 1e-13
@@ -32,7 +36,11 @@ base_hop_chance = 0.9
 when deciding if we should scale our frequency up or down.
 We compare the factor to division of bases station scores,
 which are calculated from currently used bandwidth and number of users."""
-scale_threshold = 1.05
+scale_up_threshold = 1.05
+scale_down_threshold = 1.3
+
+"""Bandwidth increase probability"""
+b_increase_prob = 0.5
 
 
 
