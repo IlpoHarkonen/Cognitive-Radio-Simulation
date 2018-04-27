@@ -10,13 +10,27 @@ import settings
 from base_station import BaseStation
 from user_device import UserDevice
 
-
-
-
 LOG = logging.getLogger("main")
+
 parser = argparse.ArgumentParser()
 parser.add_argument(
+    "-a", "--area-width", help="Length of the square's (area) side", type=float)
+parser.add_argument(
+    "-b", "--base-hop-chance", help="Chance to hop to another base station, if possible.", type=float)
+parser.add_argument(
+    "-f", "--frequency-step", help="The amount of frequency increased or decreased at once.", type=float)
+
+parser.add_argument(
+    "-n", "--noise-factor", help="Noise factor.", type=float)
+parser.add_argument(
+    "-s", "--scale-threshold", help="Threshold value when deciding frequency scaling up or down.", type=float)
+parser.add_argument(
+    "-t", "--cell-phone-tx-power", help="Transmit power of cell phone", type=float)
+parser.add_argument(
+    "-T", "--base-station-tx-power", help="Transmit power of base station", type=float)
+parser.add_argument(
     "-v", "--verbose", help="increase output verbosity", action="store_true")
+
 args = parser.parse_args()
 
 if args.verbose:
@@ -24,6 +38,32 @@ if args.verbose:
     logging.basicConfig(level=logging.DEBUG)
 else:
     logging.basicConfig(level=logging.INFO)
+
+if args.area_width:
+    settings.area_width = args.area_width
+    LOG.info("Adjusting area width NxN with N value of {} m2".format(settings.area_width))
+
+if args.base_hop_chance:
+    settings.base_hop_chance = args.base_hop_chance
+    LOG.info("Adjusting base hop chance to {}".format(settings.base_hop_chance))
+
+if args.frequency_step:
+    settings.freq_step = args.frequency_step
+    LOG.info("Adjusting frequency step to {} MHz".format(settings.freq_step))
+if args.noise_factor:
+    settings.noise_factor= args.noise_factor
+    LOG.info("Adjusting noise factor to {} ".format(settings.noise_factor))
+if args.scale_threshold:
+    settings.scale_threshold = args.scale_threshold
+    LOG.info("Adjusting scale threshold to {}".format(settings.scale_threshold))
+if args.cell_phone_tx_power:
+    settings.cell_phone_tx_power = args.cell_phone_tx_power
+    LOG.info("Adjusting cell phone transmit power to {} W".format(settings.cell_phone_tx_power))
+if args.base_station_tx_power:
+    settings.base_station_tx_power = args.base_station_tx_power
+    LOG.info("Adjusting base station transmit power to {} W".format(settings.base_station_tx_power))
+
+
 
 
 def create_base_station_grid(number_of_stations, width, spectrum_sharing=True):
@@ -142,23 +182,23 @@ while vote_stop == False:
     print("Game rounds taken: {}".format(round_count))
     round_count += 1
     vote_stop = True
-    
-    
-    
+
+
+
     """Users can now switch to another base station.
     This is done with the following knowledge:
     - Number of users that each nearby base station is serving
     - Frequency ranges currently used by nearby stations.
-    - Sensed noise from other users subscribed to different base stations""" 
+    - Sensed noise from other users subscribed to different base stations"""
     # 1. Update devices in range of all users
-    # Dynamic frequencies might occasionally hide some users whicih we previously heard
+    # Dynamic frequencies might occasionally hide some users which we previously heard
     for user in users:
         user.update_users_in_range(users)
         user.update_base_stations_in_range(base_stations)
     # 2. Change base stations
     for user in users:
-        user.look_for_new_station(users)        
-        
+        user.look_for_new_station(users)
+
     # 3. Check if any user votes to stop
     for user in users:
         if user.vote_to_stop == False:
@@ -168,12 +208,12 @@ while vote_stop == False:
     for station in base_stations:
         station.update_users_in_range(users)
         station.update_base_stations_in_range(base_stations)
-    
+
     # 5. let base stations scale their frequencies
-    
+
     for station in base_stations:
         station.scale_frequency()
-    
+
     # 6 Check if any base station votes to stop
     # Uncomment when done with dynamic spectrum allocation
     """
@@ -181,20 +221,20 @@ while vote_stop == False:
         if station.vote_to_stop == False:
             vote_stop = False
     """
-    
+
 """LOOP END WHEN NOTHING CHANGES"""
 
 """Summarise and plot results"""
-#Lines from users to their base stations
+# Lines from users to their base stations
 for user in users:
     plt.plot(
         [user.x, user.current_base_station.x],
         [user.y, user.current_base_station.y],
         color="green")
-#Users as dots
+# Users as dots
 for user in users:
     plt.plot(user.x, user.y, "o", color="blue")
-#Stations as dots
+# Stations as dots
 for station in base_stations:
     plt.plot(station.x, station.y, "o", color="black")
     plt.text(station.x, station.y, str(station.id), color="red", fontsize=12)
