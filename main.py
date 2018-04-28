@@ -9,6 +9,7 @@ import numpy as np
 import settings
 from base_station import BaseStation
 from user_device import UserDevice
+#from pytz.tzfile import base
 
 LOG = logging.getLogger("main")
 
@@ -202,7 +203,7 @@ while vote_stop == False:
         # Change base stations
         user.look_for_new_station(users)
 
-
+    
 
     # 2. Check if any user votes to stop
     for user in users:
@@ -211,20 +212,16 @@ while vote_stop == False:
     """Let base stations adjust their frequency range dynamically according to the user count."""
     # 3. Update devices in range of all base stations and
     # let base stations scale their frequencies
-
     for station in base_stations:
         station.update_users_in_range(users)
         station.update_base_stations_in_range(base_stations)
         station.scale_frequency()
-
     # 4. Check if any base station votes to stop
     # Uncomment when done with dynamic spectrum allocation
     for station in base_stations:
         if station.vote_to_stop == False:
             vote_stop = False
 
-    if round_count == 14:
-        vote_stop = True
 
 """LOOP END WHEN NOTHING CHANGES"""
 for station in base_stations:

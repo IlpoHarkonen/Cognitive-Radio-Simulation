@@ -57,7 +57,9 @@ class GenericDevice:
                 for freq_range in user.currently_used_frequencies:
                     received_power = self.calculate_signal_power(user, freq_range)
                     if received_power > settings.power_threshold:
-                        self.users_in_range.append([user, freq_range])
+                        tmp_freq = freq_range[:]
+                        if tmp_freq not in self.users_in_range:
+                            self.users_in_range.append(tmp_freq)
     
     
     def update_base_stations_in_range(self, base_station_list):

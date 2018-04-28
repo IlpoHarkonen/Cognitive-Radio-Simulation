@@ -66,7 +66,7 @@ class UserDevice(GenericDevice):
     
     
     def look_for_new_station(self, user_list):
-        """Changes to a better base station on probability P if one if found. We only consider the best found station."""
+        """Changes to a better base station on probability P if one is found. We only consider the best found station."""
         #Calculate current throughput
         current_throughput = self.calculate_throughput(self.current_base_station, self.calculate_noise_from_users(user_list, self.current_base_station))\
                                 /len(self.current_base_station.currently_served_users)
@@ -94,6 +94,7 @@ class UserDevice(GenericDevice):
                 current_station = self.current_base_station
                 current_station.currently_served_users.remove(self)
                 best_station.currently_served_users.append(self)
+                self.currently_used_frequencies = best_station.currently_used_frequencies
                 self.current_base_station = best_station
         
 

@@ -6,7 +6,7 @@ Operator:
 3: Telia
 """
 import logging
-from pdb import break_on_setattr
+#from pdb import break_on_setattr
 
 import numpy as np
 
@@ -15,7 +15,7 @@ from generic_functions import GenericDevice
 
 LOG = logging.getLogger(__name__)
 
-@break_on_setattr('currently_used_frequencies')
+#@break_on_setattr('currently_used_frequencies')
 class BaseStation(GenericDevice):
     def __init__(self, x=0, y=0, gain=1, tx_power=0, operator=0, id=0):
         GenericDevice.__init__(
@@ -79,17 +79,17 @@ class BaseStation(GenericDevice):
         Also update the list of frequencies we deem available."""
         # See which frequencies we currently hear.
         self.currently_sensed_frequencies = []
-        for [user, freq_range] in self.users_in_range:
+        for freq_range in self.users_in_range:
             if freq_range not in self.currently_sensed_frequencies:
-                self.currently_sensed_frequencies.append(freq_range)
+                self.currently_sensed_frequencies.append(freq_range[:])
         for [station, freq_range] in self.base_stations_in_range:
             if freq_range not in self.currently_sensed_frequencies:
-                self.currently_sensed_frequencies.append(freq_range)
+                self.currently_sensed_frequencies.append(freq_range[:])
         # Determine which frequencies are currently free
         self.obtainable_frequencies = self.allowed_frequencies[:]
         i = 0
         while i < len(self.obtainable_frequencies):
-            freq_range_1 = self.obtainable_frequencies[i]
+            freq_range_1 = self.obtainable_frequencies[i][:]
             for freq_range_2 in self.currently_sensed_frequencies:
                 # Check if f_min is inside the band and split lists accordingly
                 if freq_range_1[0] < freq_range_2[0] < freq_range_1[1]:
@@ -107,6 +107,12 @@ class BaseStation(GenericDevice):
                     if freq_range_1 in self.obtainable_frequencies:
                         self.obtainable_frequencies.remove(freq_range_1)
                     i -= 1
+                # Complete overlap
+                if freq_range_1[0] == freq_range_2[0] and freq_range_1[1] == freq_range_2[1]:
+                    if freq_range_1 in self.obtainable_frequencies:
+                        self.obtainable_frequencies.remove(freq_range_1)
+                    i -= 1
+                
             i += 1
             if i < 0:
                 i = 0
@@ -120,17 +126,21 @@ class BaseStation(GenericDevice):
             k = 0
             while k < len(self.currently_used_frequencies):
                 tmp_freq = []
-                freq_range_1 = self.currently_used_frequencies[i]
-                freq_range_2 = self.currently_used_frequencies[k]
+                freq_range_1 = self.currently_used_frequencies[i][:]
+                freq_range_2 = self.currently_used_frequencies[k][:]
                 if freq_range_1[1] == freq_range_2[0]:
                     tmp_freq = [freq_range_1[0], freq_range_2[1]]
                 elif freq_range_1[0] == freq_range_2[1]:
                     tmp_freq = [freq_range_2[0], freq_range_1[1]]
                 if len(tmp_freq) > 0:
-                    self.currently_used_frequencies.remove(freq_range_1)
-                    self.currently_used_frequencies.remove(freq_range_2)
+                    if freq_range_1 in self.currently_used_frequencies:
+                        self.currently_used_frequencies.remove(freq_range_1)
+                        k -= 1
+                    if freq_range_2 in self.currently_used_frequencies:
+                        self.currently_used_frequencies.remove(freq_range_2)
+                        k -= 1
+                    i -= 1
                     self.currently_used_frequencies.append(tmp_freq)
-                    k -= 1
                 k += 1
             i += 1
 
@@ -150,18 +160,14 @@ class BaseStation(GenericDevice):
         own_scale_factor = own_bandwidth/(len(self.currently_served_users) + 1)
 
         # Calculate same metric for other stations we hear
-        worst_factor = 9001
-        best_factor = 0
+        station_average = 0
         for station_listitem in self.base_stations_in_range:
             station = station_listitem[0]
             station_bandwidth = 0
             for freq_range in station.currently_used_frequencies:
                 station_bandwidth += freq_range[1] - freq_range[0]
             station_scale_factor = station_bandwidth / (len(station.currently_served_users)+1)
-            if station_scale_factor < worst_factor:
-                worst_factor = station_scale_factor
-            if station_scale_factor > best_factor:
-                best_factor = station_scale_factor
+            station_average += station_scale_factor/len(self.base_stations_in_range)
 
         # Compare metrics
         #worst_factor = int(worst_factor * 1000)
@@ -169,15 +175,12 @@ class BaseStation(GenericDevice):
         #own_scale_factor = int(own_scale_factor * 1000)
         scale_direction = 0
         # Should we scale up?
-        if own_scale_factor <= worst_factor:
-            proportion = worst_factor / own_scale_factor
-            if proportion >= settings.scale_up_threshold:
-                scale_direction = 1
-        # Should we scale down (if we can)?
-        if own_scale_factor >= best_factor and own_bandwidth >= settings.freq_start_size + settings.freq_step:
-            proportion = own_scale_factor / best_factor
-            if proportion > settings.scale_down_threshold:
-                scale_direction = -1
+        proportion = own_scale_factor / station_average
+        if proportion > settings.scale_down_threshold:
+            scale_direction = -1
+        elif proportion < settings.scale_up_threshold:
+            scale_direction = 1
+        LOG.debug("Scale factors: {}".format(scale_direction))
         return scale_direction
 
 
@@ -194,17 +197,21 @@ class BaseStation(GenericDevice):
                 r = 0
             else:
                 r = np.random.randint(0,len(self.obtainable_frequencies)-1)
-            self.currently_used_frequencies.append(self.obtainable_frequencies[r])
-            LOG.debug("New frequency is for base station " + str(self.id) + " is " + str(self.obtainable_frequencies[r]))
+            if self.obtainable_frequencies[r][:] not in self.currently_used_frequencies:
+                self.currently_used_frequencies.append(self.obtainable_frequencies[r][:])
+                LOG.debug("New frequency is for base station " + str(self.id) + " is " + str(self.obtainable_frequencies[r]))
             if self.id == 4:
                 LOG.debug("CURRENT USED FREQUENCIES " + str(self.currently_used_frequencies))
             for user in self.currently_served_users:
-                user.currently_used_frequencies.append(self.obtainable_frequencies[r])
+                pass
+                #user.currently_used_frequencies.append(self.obtainable_frequencies[r][:])
             LOG.debug("SOON TO POP " + str(self.obtainable_frequencies))
             LOG.debug("Length: " + str(len(self.obtainable_frequencies)))
             self.obtainable_frequencies.pop(r)
             LOG.debug("POPPED" + str(self.obtainable_frequencies))
             LOG.debug("Length: " + str(len(self.obtainable_frequencies)))
+        # Optimize lists
+        self.minimize_currently_used_frequency_list()
 
     def decrease_own_spectrum(self):
         """Choose a random frequency range we use and decrease it or remove completely if it is small."""
@@ -233,8 +240,7 @@ class BaseStation(GenericDevice):
         The bandwidth is incremented in small hops. We let stations have bandwidth proportional to their
         subscirbed user counts + 1."""
         self.update_currently_sensed_frequencies()
-        # Optimize lists
-        self.minimize_currently_used_frequency_list()
+        
         # Determine if we are allowed to scale.
         # If scale direction is up (1), available spectrum is not guaranteed to exist.
         scale_direction = self.determine_proportional_scaling_direction()
@@ -248,11 +254,12 @@ class BaseStation(GenericDevice):
         else:
             self.vote_to_stop = False
         # If we have permission to scale up, check for free spectrum first.
+        
         if scale_direction == 1:
             self.acquire_more_spectrum()
         elif scale_direction == -1:
             self.decrease_own_spectrum()
-
+        
 
 
     def __str__(self):
@@ -260,5 +267,5 @@ class BaseStation(GenericDevice):
         for freq_range in self.currently_used_frequencies:
             bandwidth += freq_range[1] - freq_range[0]
         text_to_print = "\tID: {} \tFrequency: {}\tTotal bandwidth: {} MHz"\
-        .format(self.id, self.currently_used_frequencies, bandwidth)
+        .format(self.id, sorted(self.currently_used_frequencies), bandwidth)
         return GenericDevice.__str__(self) + text_to_print
