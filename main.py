@@ -245,6 +245,17 @@ print("Average throughput: {:.2f} kpbs".format(avg_throughput))
 print("Minimum throughput: {:.2f} kbps".format(min_throughput))
 print("Maximum throughput: {:.2f} kbps".format(max_throughput))
 
+agg_throughput = str("{:.2f}".format(agg_throughput)).replace(".",",")
+avg_throughput = str("{:.2f}".format(avg_throughput)).replace(".",",")
+min_throughput = str("{:.2f}".format(min_throughput)).replace(".",",")
+max_throughput = str("{:.2f}".format(max_throughput)).replace(".",",")
+"""
+result_txt = "\n{}\t{}\t{}\t{}".format(agg_throughput, avg_throughput, min_throughput, max_throughput)
+# Write the same into a file
+with open('results.txt','a') as f:
+    f.write(result_txt)
+    f.close()
+"""
 
 """Summarise and plot results"""
 # Lines from users to their base stations

@@ -2,7 +2,7 @@ speed_of_light = 299792458
 
 """Choose to share all spectrum between all devices (True)
 or restrict into different operators (False)"""
-spectrum_sharing = False
+spectrum_sharing = True
 
 """Minimum received power for a device to be able to communicate with
 another (-100 dBm)"""
@@ -30,7 +30,7 @@ noise_factor = 0.01
 """Chance that we hop to another base station.
 This base chance is further divided by the number
 of users the hopping user currently senses."""
-base_hop_chance = 0.9
+base_hop_chance = 0.6
 
 """Scaling threshold. These are used as threshold  values
 when deciding if we should scale our frequency up or down.
@@ -47,10 +47,10 @@ b_increase_prob = 0.5
 """1800 MHz and 2600 MHz frequencies.
 Sublists feature min and max values of a licensed band."""
 # Operator 1
-DNA_frequencies =   [[1735, 1759], [2500, 2520]] #=44
+DNA_frequencies =   [[758, 768], [791, 801], [925, 936], [1830, 1854], [2130, 2149], [2620, 2640]]
 # Operator 2
-Elisa_frequencies = [[1760, 1784], [2545, 2570]] #=49
+Elisa_frequencies = [[768, 778], [811, 821], [948, 959], [1855, 1879], [2110, 2130], [2665, 2690]]
 # Operator 3
-Telia_frequencies = [[1710, 1734], [2520, 2545]] #=49
+Telia_frequencies = [[778, 788], [801, 811], [936, 948], [1805, 1829], [2149, 2169], [2640, 2665]]
 
 operator_frequencies = [DNA_frequencies, Elisa_frequencies, Telia_frequencies]
