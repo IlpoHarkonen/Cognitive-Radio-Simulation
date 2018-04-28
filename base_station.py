@@ -211,7 +211,7 @@ class BaseStation(GenericDevice):
             LOG.debug("POPPED" + str(self.obtainable_frequencies))
             LOG.debug("Length: " + str(len(self.obtainable_frequencies)))
         # Optimize lists
-        self.minimize_currently_used_frequency_list()
+        #self.minimize_currently_used_frequency_list()
 
     def decrease_own_spectrum(self):
         """Choose a random frequency range we use and decrease it or remove completely if it is small."""

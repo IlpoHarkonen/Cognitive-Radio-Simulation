@@ -227,6 +227,25 @@ while vote_stop == False:
 for station in base_stations:
     print(station)
 
+agg_throughput = 0
+min_throughput = 9001
+max_throughput = 0
+for user in users:
+    noise = user.calculate_noise_from_users(users, user.current_base_station)
+    throughput = user.calculate_throughput(user.current_base_station, noise)
+    agg_throughput += throughput
+    if throughput < min_throughput:
+        min_throughput = throughput
+    if throughput > max_throughput:
+        max_throughput = throughput
+avg_throughput = agg_throughput/len(users)
+
+print("Aggregate throughput: {:.2f} kpbs".format(agg_throughput))
+print("Average throughput: {:.2f} kpbs".format(avg_throughput))
+print("Minimum throughput: {:.2f} kbps".format(min_throughput))
+print("Maximum throughput: {:.2f} kbps".format(max_throughput))
+
+
 """Summarise and plot results"""
 # Lines from users to their base stations
 for user in users:

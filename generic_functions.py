@@ -36,11 +36,12 @@ class GenericDevice:
         return received_signal_power
     
     def calculate_throughput(self,sender,noise_from_other_devices):
-        """Calculate throughput according to Shannon Capacity."""
+        """Calculate throughput according to Shannon Capacity.
+        Return value is in kbps"""
         B = 0
         sig_pow = 0
         for freq_range in sender.currently_used_frequencies:
-            B += freq_range[1] - freq_range[0]
+            B += (freq_range[1] - freq_range[0]) * 1000 #kHz
             sig_pow += self.calculate_signal_power(sender, freq_range)\
                             /(len(sender.currently_used_frequencies))
         throughput = B * np.log2(1 + sig_pow / (noise_from_other_devices + settings.noise_factor))

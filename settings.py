@@ -2,7 +2,7 @@ speed_of_light = 299792458
 
 """Choose to share all spectrum between all devices (True)
 or restrict into different operators (False)"""
-spectrum_sharing = True
+spectrum_sharing = False
 
 """Minimum received power for a device to be able to communicate with
 another (-100 dBm)"""
