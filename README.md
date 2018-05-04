@@ -1,11 +1,41 @@
 # Cognitive-Radio-Simulation
 
-## To Do
-* Method for BTS to evaluate its used frequencies (scale down or up according to amount of users)
-Evaluation done -> Do actual frequency reassignment part (methods acquire_more_spectrum() and decrease_own_spectrum())
-* Turn based loop until every device votes to stop (votes taken again each round)
+## How to run
 
-Base stations work toward better throughput in total and UEs work greedily to get best value for themselves.
+Get [Python3](https://www.python.org/downloads/)
+
+Create and activate virtual environment
+
+```
+python3 -m venv venv
+source venv/bin/activate
+```
+
+If you are on Windows
+
+```
+venv\Scripts\activate
+```
+
+Install needed packages
+
+```
+pip install -r requirements.txt
+```
+
+See help 
+
+```
+python main.py -h
+```
+
+And run the simulation with default values set in settings.py. You can 
+use the command line parameters to change conditions.
+
+```
+python main.py
+```
+
 
 ## Soft To Do
 * PEP8 everything [Guide](https://www.python.org/dev/peps/pep-0008/])
